@@ -9,10 +9,11 @@ url = 'https://www.bbc.co.uk/news/health-48581317'
 
 #Request the article url to get the web page content.
 article = requests.get(url)
+soup = BeautifulSoup(article.content, 'html.parser')
 
+##Get main body
 # 1. extract all paragraph elements inside the page body
-articles = BeautifulSoup(article.content, 'html.parser')
-articles_body = articles.findAll('body')    
+articles_body = soup.findAll('body')    
 p_blocks = articles_body[0].findAll('p')
 
 # 2. for each paragraph, construct its patents elements hierarchy
@@ -60,3 +61,26 @@ maxid=p_blocks_df_groupby_parent_hierarchy_sum.loc[p_blocks_df_groupby_parent_hi
 merge_text='\n'.join(p_blocks_df.loc[p_blocks_df['parent_hierarchy']==maxid,'element_text'].to_list())
 
 print(merge_text)
+
+##get Title
+title = soup.find("meta",  {"property":"og:title"}).get('content')
+
+# date
+date = soup.find("meta",  {"property":"article:published_time"}).get('content')
+
+# description
+description = soup.find("meta", {"property":"og:description"}).get('content')
+
+# keyword
+keywords = []
+keyword = soup.findAll("meta",  {"property":"article:tag"})
+for k in keyword:
+  keywords.append(k["content"] if k else None)
+# wordcount
+wordcount = soup.find("meta",  {"property":"article:word_count"}).get('content')
+
+print("title: ", title)
+print("description: ", description)
+print("date: ",date)
+print("keywords: ",keywords)
+print("wordcount: ",wordcount)
